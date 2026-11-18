@@ -14,18 +14,37 @@
 </header>
 <main>
   <section>
-    <h2>このツールについて</h2>
-    <p>マルコフ連鎖の理論（最尤推定・定常分布・収束）が、実際の株価データでどこまで成り立つかを検証するためのツールです。銘柄の推奨や売買シグナルの提示は行いません。</p>
+    <h2>分析条件</h2>
+    <form id="analysis-form">
+      <label>銘柄コード
+        <input type="text" id="ticker" value="7203.T" required>
+      </label>
+      <label>開始日
+        <input type="date" id="start" required>
+      </label>
+      <label>終了日（この日は含まない）
+        <input type="date" id="end" required>
+      </label>
+      <label>閾値 θ（%）
+        <input type="number" id="theta" value="0.5" step="0.1" min="0.1" required>
+      </label>
+      <button type="submit">分析する</button>
+    </form>
+    <p id="message" class="message"></p>
   </section>
   <section>
-    <h2>機能（予定を含む）</h2>
-    <ol>
-      <li>状態分類と遷移の表示（遷移回数・遷移確率）</li>
-      <li>状態分布と収束の可視化</li>
-      <li>バックテスト（ベースライン比較）</li>
-      <li>結果の保存</li>
-    </ol>
-    <p id="status">現在は開発初期（雛形）です。</p>
+    <h2>分析結果</h2>
+    <div id="result">
+      <p>まだ分析していません。「分析する」を押すと、状態分類と遷移行列が表示されます。</p>
+    </div>
+  </section>
+  <section>
+    <h2>保存済みの分析</h2>
+    <ul id="saved-list"></ul>
+  </section>
+  <section>
+    <h2>このツールについて</h2>
+    <p>マルコフ連鎖の理論（最尤推定・定常分布・収束）が、実際の株価データでどこまで成り立つかを検証するためのツールです。銘柄の推奨や売買シグナルの提示は行いません。状態は日次リターンを閾値θで U（上昇）/ F（横ばい）/ D（下落）に分類したものです。</p>
   </section>
 </main>
 <script src="js/app.js"></script>

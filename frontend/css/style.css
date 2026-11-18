@@ -14,3 +14,61 @@ header h1 {
 section {
   margin-top: 2rem;
 }
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+
+form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+form input {
+  padding: 0.35rem 0.5rem;
+  font-size: 1rem;
+}
+
+button {
+  padding: 0.45rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.message {
+  min-height: 1.5em;
+  color: #555;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 0.5rem 0 1.5rem;
+}
+
+th, td {
+  border: 1px solid #bbb;
+  padding: 0.35rem 0.9rem;
+  text-align: right;
+}
+
+thead th, tbody th {
+  background: #f0f3f7;
+  text-align: left;
+}
+
+#saved-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+#saved-list li {
+  margin: 0.3rem 0;
+}
+
+#saved-list button {
+  font-size: 0.95rem;
+}
