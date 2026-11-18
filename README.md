@@ -50,5 +50,5 @@ docker compose up --build
 
 ## 開発ステータス
 
-STEP 1（リポジトリ作成・雛形配置）まで完了。push のたびに GitHub Actions でバックエンドのビルド、分析サービスのテスト、Docker Compose のビルドと起動確認が自動実行される。機能実装は計画書に基づき段階的に進める。
+STEP 2（分析サービス：状態分類と遷移行列の推定）まで完了。遷移行列の推定 API（POST /internal/v1/transition-matrix）が利用できる。push のたびに GitHub Actions でバックエンドのビルド、分析サービスのテスト、Docker Compose のビルドと起動確認が自動実行される。機能実装は計画書に基づき段階的に進める。
 計画書は開発者手元の `MarkovStockAnalyzer2_計画書.md` を参照。
