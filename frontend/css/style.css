@@ -1,0 +1,16 @@
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  margin: 2rem auto;
+  max-width: 880px;
+  padding: 0 1rem;
+  line-height: 1.7;
+  color: #222;
+}
+
+header h1 {
+  margin-bottom: 0.25rem;
+}
+
+section {
+  margin-top: 2rem;
+}

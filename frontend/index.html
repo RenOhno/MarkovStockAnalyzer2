@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markov Stock Analyzer 2</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>Markov Stock Analyzer 2</h1>
+  <p>マルコフ連鎖を用いた株価の上昇・下落傾向分析（ゼミ研究の検証ツール）</p>
+</header>
+<main>
+  <section>
+    <h2>このツールについて</h2>
+    <p>マルコフ連鎖の理論（最尤推定・定常分布・収束）が、実際の株価データでどこまで成り立つかを検証するためのツールです。銘柄の推奨や売買シグナルの提示は行いません。</p>
+  </section>
+  <section>
+    <h2>機能（予定を含む）</h2>
+    <ol>
+      <li>状態分類と遷移の表示（遷移回数・遷移確率）</li>
+      <li>状態分布と収束の可視化</li>
+      <li>バックテスト（ベースライン比較）</li>
+      <li>結果の保存</li>
+    </ol>
+    <p id="status">現在は開発初期（雛形）です。</p>
+  </section>
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>
