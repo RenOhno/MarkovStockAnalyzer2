@@ -1,5 +1,7 @@
 # MarkovStockAnalyzer2
 
+[![CI](https://github.com/RenOhno/MarkovStockAnalyzer2/actions/workflows/ci.yml/badge.svg)](https://github.com/RenOhno/MarkovStockAnalyzer2/actions/workflows/ci.yml)
+
 マルコフ連鎖を用いた株価の上昇・下落傾向分析を行う、ゼミ研究向けの検証ツール。
 前身プロジェクト MarkovStockAnalyzer の作り直し版。
 
@@ -48,5 +50,5 @@ docker compose up --build
 
 ## 開発ステータス
 
-STEP 1（リポジトリ作成・雛形配置）まで完了。機能実装は計画書に基づき段階的に進める。
+STEP 1（リポジトリ作成・雛形配置）まで完了。push のたびに GitHub Actions でバックエンドのビルド、分析サービスのテスト、Docker Compose のビルドと起動確認が自動実行される。機能実装は計画書に基づき段階的に進める。
 計画書は開発者手元の `MarkovStockAnalyzer2_計画書.md` を参照。
