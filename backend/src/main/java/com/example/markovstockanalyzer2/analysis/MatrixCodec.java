@@ -71,4 +71,28 @@ public final class MatrixCodec {
         }
         return matrix;
     }
+
+    /** Encodes a flat list of nullable doubles as "0.1,null,0.25". */
+    public static String encodeDoubleList(List<Double> values) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            Double value = values.get(i);
+            sb.append(value == null ? "null" : Double.toString(value));
+        }
+        return sb.toString();
+    }
+
+    public static List<Double> decodeDoubleList(String encoded) {
+        List<Double> values = new ArrayList<>();
+        if (encoded == null || encoded.isEmpty()) {
+            return values;
+        }
+        for (String value : encoded.split(",")) {
+            values.add("null".equals(value) ? null : Double.parseDouble(value));
+        }
+        return values;
+    }
 }

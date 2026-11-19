@@ -60,6 +60,18 @@ public class AnalysisResult {
     @Column(name = "transition_probabilities", nullable = false, length = 512)
     private String transitionProbabilities;
 
+    @Column(name = "stationary_distribution", length = 128)
+    private String stationaryDistribution;
+
+    @Column(name = "horizon_distributions", length = 1024)
+    private String horizonDistributions;
+
+    @Column(name = "convergence_distributions", length = 8192)
+    private String convergenceDistributions;
+
+    @Column(name = "convergence_distances", length = 4096)
+    private String convergenceDistances;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -173,6 +185,38 @@ public class AnalysisResult {
 
     public void setTransitionProbabilities(String transitionProbabilities) {
         this.transitionProbabilities = transitionProbabilities;
+    }
+
+    public String getStationaryDistribution() {
+        return stationaryDistribution;
+    }
+
+    public void setStationaryDistribution(String stationaryDistribution) {
+        this.stationaryDistribution = stationaryDistribution;
+    }
+
+    public String getHorizonDistributions() {
+        return horizonDistributions;
+    }
+
+    public void setHorizonDistributions(String horizonDistributions) {
+        this.horizonDistributions = horizonDistributions;
+    }
+
+    public String getConvergenceDistributions() {
+        return convergenceDistributions;
+    }
+
+    public void setConvergenceDistributions(String convergenceDistributions) {
+        this.convergenceDistributions = convergenceDistributions;
+    }
+
+    public String getConvergenceDistances() {
+        return convergenceDistances;
+    }
+
+    public void setConvergenceDistances(String convergenceDistances) {
+        this.convergenceDistances = convergenceDistances;
     }
 
     public LocalDateTime getCreatedAt() {

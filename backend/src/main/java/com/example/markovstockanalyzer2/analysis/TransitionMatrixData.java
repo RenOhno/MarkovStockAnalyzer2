@@ -16,5 +16,8 @@ public record TransitionMatrixData(
         @JsonProperty("state_counts") Map<String, Integer> stateCounts,
         @JsonProperty("transition_counts") List<List<Integer>> transitionCounts,
         @JsonProperty("transition_probabilities") List<List<Double>> transitionProbabilities,
-        @JsonProperty("current_state") String currentState) {
+        @JsonProperty("current_state") String currentState,
+        @JsonProperty("stationary_distribution") List<Double> stationaryDistribution,
+        @JsonProperty("horizon_distributions") Map<String, List<Double>> horizonDistributions,
+        @JsonProperty("convergence") List<ConvergenceData> convergence) {
 }

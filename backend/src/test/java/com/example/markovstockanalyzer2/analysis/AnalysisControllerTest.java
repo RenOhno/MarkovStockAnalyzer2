@@ -29,6 +29,13 @@ class AnalysisControllerTest {
                         List.of(0.3800, 0.3080, 0.3120),
                         List.of(0.3758, 0.2671, 0.3571)),
                 "F",
+                List.of(0.3850, 0.2699, 0.3451),
+                Map.of(
+                        "1", List.of(0.3800, 0.3080, 0.3120),
+                        "3", List.of(0.3850, 0.2700, 0.3450),
+                        "5", List.of(0.3850, 0.2699, 0.3451),
+                        "10", List.of(0.3850, 0.2699, 0.3451)),
+                List.of(new AnalysisResultResponse.ConvergencePoint(0, List.of(0.0, 1.0, 0.0), 0.23)),
                 LocalDateTime.of(2026, 11, 18, 12, 0));
     }
 

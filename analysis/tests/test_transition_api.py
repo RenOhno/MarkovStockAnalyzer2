@@ -38,6 +38,13 @@ def test_transition_matrix(monkeypatch: pytest.MonkeyPatch) -> None:
     ]
     assert body["current_state"] == "U"
     assert body["theta"] == 0.005
+    # Distribution fields: starting from U, h=1 is the U row of the matrix
+    assert body["horizon_distributions"]["1"] == [0.0, 1.0, 0.0]
+    assert body["stationary_distribution"] is not None
+    assert sum(body["stationary_distribution"]) == pytest.approx(1.0)
+    assert len(body["convergence"]) == 61  # h = 0..60 by default
+    assert body["convergence"][0]["distribution"] == [1.0, 0.0, 0.0]
+    assert body["convergence"][0]["distance"] is not None
 
 
 def test_not_enough_data(monkeypatch: pytest.MonkeyPatch) -> None:

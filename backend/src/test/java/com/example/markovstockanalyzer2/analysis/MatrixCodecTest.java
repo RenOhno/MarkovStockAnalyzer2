@@ -17,6 +17,14 @@ class MatrixCodecTest {
     }
 
     @Test
+    void doubleListRoundTripWithNull() {
+        List<Double> values = java.util.Arrays.asList(0.5, null, 0.25);
+        String encoded = MatrixCodec.encodeDoubleList(values);
+        assertEquals("0.5,null,0.25", encoded);
+        assertEquals(values, MatrixCodec.decodeDoubleList(encoded));
+    }
+
+    @Test
     void probabilitiesRoundTripWithNullRow() {
         List<List<Double>> matrix =
                 List.of(

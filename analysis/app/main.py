@@ -30,11 +30,21 @@ def health(x_internal_token: str = Header(default="")) -> dict[str, str]:
     return {"status": "UP"}
 
 
+HORIZONS = (1, 3, 5, 10)
+
+
 class TransitionMatrixRequest(BaseModel):
     ticker: str
     start: date
     end: date  # exclusive, following the yfinance convention
     theta: float = Field(default=markov.DEFAULT_THETA, gt=0)
+    max_h: int = Field(default=60, ge=10, le=365)
+
+
+class ConvergencePoint(BaseModel):
+    h: int
+    distribution: list[float] | None
+    distance: float | None  # total variation distance to the stationary dist.
 
 
 class TransitionMatrixResponse(BaseModel):
@@ -49,6 +59,9 @@ class TransitionMatrixResponse(BaseModel):
     transition_counts: list[list[int]]
     transition_probabilities: list[list[float | None]]
     current_state: str
+    stationary_distribution: list[float] | None
+    horizon_distributions: dict[str, list[float] | None]
+    convergence: list[ConvergencePoint]
 
 
 @app.post("/internal/v1/transition-matrix", response_model=TransitionMatrixResponse)
@@ -67,6 +80,28 @@ def transition_matrix(
     values = [c for _, c in closes]
     states = markov.classify_states(markov.compute_returns(values), req.theta)
     counts = markov.transition_counts(states)
+    matrix = markov.estimate_transition_matrix(counts)
+    current_state = states[-1]
+
+    stationary = markov.stationary_distribution(matrix)
+    trajectory = markov.distribution_trajectory(
+        matrix, current_state, max(req.max_h, max(HORIZONS))
+    )
+    horizon_distributions = {
+        str(h): trajectory[h] for h in HORIZONS
+    }
+    convergence = [
+        ConvergencePoint(
+            h=h,
+            distribution=trajectory[h],
+            distance=(
+                markov.total_variation_distance(trajectory[h], stationary)
+                if trajectory[h] is not None and stationary is not None
+                else None
+            ),
+        )
+        for h in range(req.max_h + 1)
+    ]
     return TransitionMatrixResponse(
         ticker=req.ticker,
         start=req.start,
@@ -77,6 +112,9 @@ def transition_matrix(
         observations=len(states),
         state_counts=markov.count_states(states),
         transition_counts=counts,
-        transition_probabilities=markov.estimate_transition_matrix(counts),
-        current_state=states[-1],
+        transition_probabilities=matrix,
+        current_state=current_state,
+        stationary_distribution=stationary,
+        horizon_distributions=horizon_distributions,
+        convergence=convergence,
     )

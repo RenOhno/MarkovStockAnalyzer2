@@ -42,6 +42,38 @@ public class AnalysisService {
         entity.setTransitionCounts(MatrixCodec.encodeCounts(data.transitionCounts()));
         entity.setTransitionProbabilities(
                 MatrixCodec.encodeProbabilities(data.transitionProbabilities()));
+        entity.setStationaryDistribution(
+                data.stationaryDistribution() == null
+                        ? null
+                        : MatrixCodec.encodeProbabilities(
+                                List.of(data.stationaryDistribution())));
+
+        List<List<Double>> horizonRows = new java.util.ArrayList<>();
+        for (String key : AnalysisResultResponse.HORIZON_KEYS) {
+            List<Double> dist =
+                    data.horizonDistributions() == null
+                            ? null
+                            : data.horizonDistributions().get(key);
+            horizonRows.add(
+                    dist == null
+                            ? java.util.Arrays.<Double>asList(null, null, null)
+                            : dist);
+        }
+        entity.setHorizonDistributions(MatrixCodec.encodeProbabilities(horizonRows));
+
+        List<List<Double>> convDists = new java.util.ArrayList<>();
+        List<Double> convDistances = new java.util.ArrayList<>();
+        if (data.convergence() != null) {
+            for (ConvergenceData point : data.convergence()) {
+                convDists.add(
+                        point.distribution() == null
+                                ? java.util.Arrays.<Double>asList(null, null, null)
+                                : point.distribution());
+                convDistances.add(point.distance());
+            }
+        }
+        entity.setConvergenceDistributions(MatrixCodec.encodeProbabilities(convDists));
+        entity.setConvergenceDistances(MatrixCodec.encodeDoubleList(convDistances));
         entity.setCreatedAt(LocalDateTime.now());
 
         return AnalysisResultResponse.from(repository.save(entity));

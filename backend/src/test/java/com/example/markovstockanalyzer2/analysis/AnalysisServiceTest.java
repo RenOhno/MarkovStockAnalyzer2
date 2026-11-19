@@ -25,7 +25,16 @@ class AnalysisServiceTest {
                 Map.of("U", 2, "F", 1, "D", 1),
                 List.of(List.of(0, 1, 0), List.of(0, 0, 1), List.of(1, 0, 0)),
                 List.of(List.of(0.0, 1.0, 0.0), List.of(0.0, 0.0, 1.0), List.of(1.0, 0.0, 0.0)),
-                "U");
+                "U",
+                List.of(1.0 / 3, 1.0 / 3, 1.0 / 3),
+                Map.of(
+                        "1", List.of(0.0, 1.0, 0.0),
+                        "3", List.of(1.0, 0.0, 0.0),
+                        "5", List.of(0.0, 0.0, 1.0),
+                        "10", List.of(0.0, 1.0, 0.0)),
+                List.of(
+                        new ConvergenceData(0, List.of(1.0, 0.0, 0.0), 0.5),
+                        new ConvergenceData(1, List.of(0.0, 1.0, 0.0), 0.25)));
     }
 
     @Test
@@ -48,6 +57,10 @@ class AnalysisServiceTest {
                 List.of(List.of(0, 1, 0), List.of(0, 0, 1), List.of(1, 0, 0)),
                 response.transitionCounts());
         assertEquals("U", response.currentState());
+        assertEquals(List.of(1.0 / 3, 1.0 / 3, 1.0 / 3), response.stationaryDistribution());
+        assertEquals(List.of(0.0, 1.0, 0.0), response.horizonDistributions().get("1"));
+        assertEquals(2, response.convergence().size());
+        assertEquals(0.5, response.convergence().get(0).distance());
         verify(repository).save(any(AnalysisResult.class));
     }
 
