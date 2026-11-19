@@ -47,4 +47,31 @@ public class AnalysisClient {
             throw new AnalysisServiceException(502, "analysis service unreachable: " + e.getMessage());
         }
     }
+
+    public BacktestData runBacktest(
+            String ticker, LocalDate start, LocalDate end, double theta, int minTrain) {
+        BacktestRequest body =
+                new BacktestRequest(ticker, start.toString(), end.toString(), theta, minTrain);
+        try {
+            return restClient
+                    .post()
+                    .uri("/internal/v1/backtest")
+                    .header("X-Internal-Token", internalToken)
+                    .body(body)
+                    .retrieve()
+                    .onStatus(
+                            HttpStatusCode::isError,
+                            (request, response) -> {
+                                throw new AnalysisServiceException(
+                                        response.getStatusCode().value(),
+                                        "analysis service returned "
+                                                + response.getStatusCode());
+                            })
+                    .body(BacktestData.class);
+        } catch (AnalysisServiceException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new AnalysisServiceException(502, "analysis service unreachable: " + e.getMessage());
+        }
+    }
 }

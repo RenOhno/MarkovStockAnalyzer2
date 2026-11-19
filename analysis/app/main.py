@@ -4,6 +4,8 @@ Endpoints:
 - GET  /internal/v1/health            health check
 - POST /internal/v1/transition-matrix state classification + transition
   counts / MLE transition probabilities for a ticker and period
+- POST /internal/v1/backtest          walk-forward backtest against the
+  Majority and Persistence baselines
 """
 
 import os
@@ -12,7 +14,7 @@ from datetime import date
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from app import markov, prices
+from app import backtest, markov, prices
 
 app = FastAPI(title="Markov Stock Analyzer 2 - Analysis Service")
 
@@ -117,4 +119,70 @@ def transition_matrix(
         stationary_distribution=stationary,
         horizon_distributions=horizon_distributions,
         convergence=convergence,
+    )
+
+
+class BacktestRequest(BaseModel):
+    ticker: str
+    start: date
+    end: date  # exclusive, following the yfinance convention
+    theta: float = Field(default=markov.DEFAULT_THETA, gt=0)
+    min_train: int = Field(default=backtest.DEFAULT_MIN_TRAIN, ge=1, le=10000)
+
+
+class ModelMetrics(BaseModel):
+    predictions: int
+    skipped: int
+    accuracy: float | None
+    precision: dict[str, float]
+    recall: dict[str, float]
+    precision_macro: float | None
+    recall_macro: float | None
+    confusion_matrix: list[list[int]]
+    brier_score: float | None
+    log_loss: float | None
+
+
+class BacktestResponse(BaseModel):
+    ticker: str
+    start: date
+    end: date
+    theta: float
+    data_start: date
+    data_end: date
+    observations: int
+    min_train: int
+    steps: int
+    models: dict[str, ModelMetrics]
+
+
+@app.post("/internal/v1/backtest", response_model=BacktestResponse)
+def run_backtest_endpoint(
+    req: BacktestRequest, x_internal_token: str = Header(default="")
+) -> BacktestResponse:
+    require_token(x_internal_token)
+    try:
+        closes = prices.fetch_adjusted_closes(req.ticker, req.start, req.end)
+    except prices.PriceDataError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    values = [c for _, c in closes]
+    states = markov.classify_states(markov.compute_returns(values), req.theta)
+    if len(states) - 1 <= req.min_train:
+        raise HTTPException(
+            status_code=422,
+            detail="not enough price data for a backtest with "
+            f"min_train={req.min_train}",
+        )
+    result = backtest.run_backtest(states, req.min_train)
+    return BacktestResponse(
+        ticker=req.ticker,
+        start=req.start,
+        end=req.end,
+        theta=req.theta,
+        data_start=closes[0][0],
+        data_end=closes[-1][0],
+        observations=result["observations"],  # type: ignore[arg-type]
+        min_train=result["min_train"],  # type: ignore[arg-type]
+        steps=result["steps"],  # type: ignore[arg-type]
+        models=result["models"],  # type: ignore[arg-type]
     )

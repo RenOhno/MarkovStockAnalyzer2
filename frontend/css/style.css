@@ -60,16 +60,16 @@ thead th, tbody th {
   text-align: left;
 }
 
-#saved-list {
+#saved-list, #saved-backtests {
   list-style: none;
   padding-left: 0;
 }
 
-#saved-list li {
+#saved-list li, #saved-backtests li {
   margin: 0.3rem 0;
 }
 
-#saved-list button {
+#saved-list button, #saved-backtests button {
   font-size: 0.95rem;
 }
 

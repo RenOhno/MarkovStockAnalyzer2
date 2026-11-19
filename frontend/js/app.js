@@ -277,5 +277,147 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+const MODEL_ORDER = ["markov", "majority", "persistence"];
+const MODEL_LABELS = {
+  markov: "マルコフ",
+  majority: "Majority（最頻状態）",
+  persistence: "Persistence（前日と同じ）",
+};
+
+const backtestForm = document.getElementById("backtest-form");
+const backtestMessageEl = document.getElementById("backtest-message");
+const backtestResultEl = document.getElementById("backtest-result");
+const savedBacktestsEl = document.getElementById("saved-backtests");
+
+function score(v, digits) {
+  return v === null || v === undefined ? "—" : v.toFixed(digits);
+}
+
+function renderBacktest(r) {
+  backtestResultEl.textContent = "";
+  const meta = document.createElement("p");
+  meta.textContent =
+    `${r.ticker} ／ データ期間 ${r.dataStart} 〜 ${r.dataEnd} ／ 観測数 ${r.observations} ／ ` +
+    `評価ステップ数 ${r.steps} ／ 最小学習数 ${r.minTrain} ／ θ = ${(r.theta * 100).toFixed(1)}%`;
+  backtestResultEl.appendChild(meta);
+
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const label of ["モデル", "予測数", "Accuracy", "Precision", "Recall", "Brier", "Log Loss"]) {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headRow.appendChild(th);
+  }
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  for (const key of MODEL_ORDER) {
+    const m = r.models[key];
+    if (!m) continue;
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = MODEL_LABELS[key];
+    tr.appendChild(th);
+    const cells = [
+      String(m.predictions),
+      m.accuracy === null ? "—" : `${(m.accuracy * 100).toFixed(1)}%`,
+      score(m.precisionMacro, 3),
+      score(m.recallMacro, 3),
+      score(m.brierScore, 3),
+      score(m.logLoss, 3),
+    ];
+    for (const text of cells) {
+      const td = document.createElement("td");
+      td.textContent = text;
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  backtestResultEl.appendChild(table);
+
+  const markov = r.models.markov;
+  if (markov && markov.skipped > 0) {
+    const skip = document.createElement("p");
+    skip.textContent =
+      `マルコフは、現在の状態の遷移行が未推定だった ${markov.skipped} ステップを予測せずにスキップしました。`;
+    backtestResultEl.appendChild(skip);
+  }
+  if (markov) {
+    backtestResultEl.appendChild(
+      matrixTable("混同行列（マルコフ）", markov.confusionMatrix, (v) => String(v))
+    );
+    const note = document.createElement("p");
+    note.textContent = "混同行列は、行が実際の状態、列が予測した状態です。対角成分が正解数です。";
+    backtestResultEl.appendChild(note);
+  }
+  const note = document.createElement("p");
+  note.textContent =
+    "Precision / Recall は3状態のマクロ平均です。Brier と Log Loss は小さいほど良い指標です。";
+  backtestResultEl.appendChild(note);
+}
+
+async function loadSavedBacktests() {
+  savedBacktestsEl.textContent = "";
+  try {
+    const res = await fetch("/api/backtests");
+    if (!res.ok) return;
+    const items = await res.json();
+    if (items.length === 0) {
+      const li = document.createElement("li");
+      li.textContent = "保存済みのバックテストはまだありません。";
+      savedBacktestsEl.appendChild(li);
+      return;
+    }
+    for (const item of items) {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      const acc = item.models.markov.accuracy;
+      button.textContent =
+        `${item.ticker} ${item.dataStart}〜${item.dataEnd}` +
+        `（θ=${(item.theta * 100).toFixed(1)}%、Accuracy ${acc === null ? "—" : (acc * 100).toFixed(1) + "%"}）`;
+      button.addEventListener("click", async () => {
+        const res = await fetch(`/api/backtests/${item.id}`);
+        if (res.ok) renderBacktest(await res.json());
+      });
+      li.appendChild(button);
+      savedBacktestsEl.appendChild(li);
+    }
+  } catch (e) {
+    // Backend not reachable yet (e.g. static preview): leave the list empty.
+  }
+}
+
+backtestForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  backtestMessageEl.textContent = "バックテスト実行中…";
+  const payload = {
+    ticker: document.getElementById("ticker").value.trim(),
+    start: document.getElementById("start").value,
+    end: document.getElementById("end").value,
+    theta: Number(document.getElementById("theta").value) / 100,
+    minTrain: Number(document.getElementById("min-train").value),
+  };
+  try {
+    const res = await fetch("/api/backtests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `エラー（${res.status}）`);
+    }
+    renderBacktest(await res.json());
+    backtestMessageEl.textContent = "バックテストが完了し、結果を保存しました。";
+    loadSavedBacktests();
+  } catch (e) {
+    backtestMessageEl.textContent = `バックテストを実行できませんでした： ${e.message}`;
+  }
+});
+
 initDefaults();
 loadSaved();
+loadSavedBacktests();

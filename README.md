@@ -25,6 +25,8 @@
 - 日次リターン r_t = C_t / C_{t−1} − 1（C は調整後終値）
 - 状態分類の閾値 θ = 0.005（±0.5%）
 - 遷移確率は最尤推定 p̂_ij = n_ij / n_i、n_i = 0 の行は「未推定」（一様分布で埋めない）
+- バックテストは walk-forward（拡大ウィンドウ）方式。最小学習数 30（遷移の本数）から開始し、各時点ではそれまでの遷移だけで推定した行列の、現在の状態の行を翌営業日の予測分布とする。現在の状態の行が未推定の場合は予測せずスキップする
+- ベースライン：Majority（学習期間の状態分布をそのまま予測分布とする）、Persistence（現在の状態の一点分布）
 - 評価指標：Accuracy / Precision / Recall / 混同行列 / Brier スコア / Log Loss
 
 ## 技術構成
@@ -50,5 +52,5 @@ docker compose up --build
 
 ## 開発ステータス
 
-STEP 4（状態分布と収束の可視化）まで完了。分析結果には定常分布、h営業日後（1・3・5・10）の状態分布、現在の状態から定常分布へ収束していく過程のグラフが含まれる。結果は DB に保存され、保存済み一覧から再表示できる。バックエンド API は POST / GET /api/analyses。push のたびに GitHub Actions でバックエンドのビルド、分析サービスのテスト、Docker Compose のビルドと起動確認が自動実行される。機能実装は計画書に基づき段階的に進める。
+STEP 5（バックテストと比較表示）まで完了。分析結果には定常分布、h営業日後（1・3・5・10）の状態分布、現在の状態から定常分布へ収束していく過程のグラフが含まれる。バックテストでは walk-forward 方式でマルコフ予測を Majority・Persistence と比較し、Accuracy・Precision・Recall・Brier スコア・Log Loss と混同行列を表示する。結果はいずれも DB に保存され、保存済み一覧から再表示できる。バックエンド API は POST / GET /api/analyses と POST / GET /api/backtests。push のたびに GitHub Actions でバックエンドのビルド、分析サービスのテスト、Docker Compose のビルドと起動確認が自動実行される。機能実装は計画書に基づき段階的に進める。
 計画書は開発者手元の `MarkovStockAnalyzer2_計画書.md` を参照。
